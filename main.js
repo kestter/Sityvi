@@ -1,19 +1,17 @@
-const TEST_MODE = true;
-
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
-// Puzzle #1 is on 29.09.2026
-const START_DATE = { year: 2026, month: 8, day: 29 }; // month is 0-based
+const START_DATE = { year: 2026, month: 8, day: 29 }; // 
 const SHUFFLE_SEED = 20260929;
 const STORAGE_KEY = "sityvi-state";
 
 const KEYBOARD_ROWS = [
-  ["ქ", "წ", "ჭ", "ე", "რ", "ღ", "ტ", "თ", "ყ", "უ", "ი"],
-  ["ო", "პ", "ა", "ს", "შ", "დ", "ფ", "გ", "ჰ", "ჯ", "ჟ"],
-  ["ENTER", "კ", "ლ", "ზ", "ძ", "ხ", "ც", "ჩ", "ვ", "ბ", "ნ", "მ", "BACKSPACE"],
+  ["ქ", "წ", "ე", "რ", "ტ", "ყ", "უ", "ი", "პ"],
+  [  "ა", "ს", "დ", "ფ", "გ", "ჰ", "ჯ", "კ", "ლ",],
+  ["ზ", "ძ", "ც", "ვ", "ბ", "ნ", "მ", "ვ", "ბ", "ნ", "მ"],
+  ["ჭ","თ", "შ", "ჟ","ძ","ჩ" ,"BACKSPACE", "ENTER"]
 ];
 
-// Standard Georgian keyboard layout, so a Latin keyboard can be used too
+
 const LATIN_TO_GEORGIAN = {
   a: "ა", b: "ბ", g: "გ", d: "დ", e: "ე", v: "ვ", z: "ზ", T: "თ", i: "ი",
   k: "კ", l: "ლ", m: "მ", n: "ნ", o: "ო", p: "პ", J: "ჟ", r: "რ", s: "ს",
@@ -33,7 +31,7 @@ const state = {
   busy: false,
 };
 
-// ---------- Day / word selection ----------
+//day / word selection
 
 function getPuzzleNumber(now = new Date()) {
   const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
@@ -78,7 +76,7 @@ async function loadWords() {
   return words;
 }
 
-// ---------- Rendering ----------
+// rend
 
 const boardEl = document.getElementById("board");
 const keyboardEl = document.getElementById("keyboard");
@@ -194,14 +192,49 @@ function paintRow(rowIndex, guess, statuses, animate) {
 
 function showResult(won) {
   document.getElementById("result-title").textContent = won
-    ? "გილოცავთ! თქვენ გამოიცანით სიტყვა!"
-    : "სამწუხაროდ, ვერ გამოიცანით. სიტყვა იყო:";
+    ? "საღოლ!"
+    : "ბანძო, ვერ გამოიცანი";
   document.getElementById("result-word").textContent = state.answer.word;
   document.getElementById("result-meaning").textContent = state.answer.meaning;
-  document.getElementById("result").classList.remove("hidden");
+  document.getElementById("result-box").classList.remove("hidden");
 }
 
-// ---------- Game logic ----------
+// modals
+
+const helpModal = document.getElementById("help-modal");
+const resultModal = document.getElementById("result-modal");
+
+function openModal(modal) {
+  closeModals();
+  modal.classList.remove("hidden");
+}
+
+function closeModals() {
+  document.querySelectorAll(".modal-backdrop").forEach((m) => m.classList.add("hidden"));
+}
+
+function isModalOpen() {
+  return document.querySelector(".modal-backdrop:not(.hidden)") !== null;
+}
+
+document.querySelectorAll(".modal-backdrop").forEach((backdrop) => {
+  backdrop.addEventListener("click", (event) => {
+    if (event.target === backdrop) closeModals();
+  });
+  backdrop.querySelector(".modal-close").addEventListener("click", closeModals);
+});
+
+document.getElementById("help-button").addEventListener("click", (event) => {
+  openModal(helpModal);
+  event.currentTarget.blur();
+});
+
+document.getElementById("timer-button").addEventListener("click", (event) => {
+  openModal(resultModal);
+  event.currentTarget.blur();
+});
+
+// game logic
 
 function evaluate(guess, answer) {
   const g = [...guess];
@@ -228,7 +261,6 @@ function saveState() {
       JSON.stringify({ puzzle: state.puzzleNumber, guesses: state.guesses })
     );
   } catch (e) {
-    // storage unavailable - progress just won't survive a reload
   }
 }
 
@@ -239,7 +271,6 @@ function loadSavedGuesses() {
       return saved.guesses.filter((g) => state.wordSet.has(g)).slice(0, MAX_GUESSES);
     }
   } catch (e) {
-    // ignore broken or unavailable storage
   }
   return [];
 }
@@ -247,12 +278,12 @@ function loadSavedGuesses() {
 async function submitGuess() {
   const guess = state.current;
   if ([...guess].length < WORD_LENGTH) {
-    showMessage("არასაკმარისი ასოები");
+    showMessage("არ არის საკმარისი ასოები.");
     shakeRow();
     return;
   }
   if (!state.wordSet.has(guess)) {
-    showMessage("სიტყვა ლექსიკონში არ არის");
+    showMessage("სიტყვა ლექსიკონში არ არის, მომწერე ჩავამატებ");
     shakeRow();
     return;
   }
@@ -270,13 +301,13 @@ async function submitGuess() {
 
 function checkFinished(announce) {
   const last = state.guesses[state.guesses.length - 1];
-  if (last === state.answer.word) {
-    state.finished = true;
-    if (announce) showMessage("ბრწყინვალეა!");
-    showResult(true);
-  } else if (state.guesses.length >= MAX_GUESSES) {
-    state.finished = true;
-    showResult(false);
+  const won = last === state.answer.word;
+  if (!won && state.guesses.length < MAX_GUESSES) return;
+  state.finished = true;
+  showResult(won);
+  if (announce) {
+    if (won) showMessage("ბრწყინვალეა!");
+    setTimeout(() => openModal(resultModal), 1200);
   }
 }
 
@@ -294,6 +325,10 @@ function handleKey(key) {
 }
 
 document.addEventListener("keydown", (event) => {
+  if (isModalOpen()) {
+    if (event.key === "Escape") closeModals();
+    return;
+  }
   if (event.ctrlKey || event.metaKey || event.altKey) return;
   if (event.key === "Enter") {
     event.preventDefault();
@@ -307,10 +342,10 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-// ---------- Countdown ----------
+// countdown
 
 function startCountdown() {
-  const el = document.getElementById("countdown");
+  const elements = document.querySelectorAll(".countdown");
   const tick = () => {
     const now = new Date();
     if (getPuzzleNumber(now) !== state.puzzleNumber) {
@@ -322,13 +357,13 @@ function startCountdown() {
     const h = String(Math.floor(total / 3600)).padStart(2, "0");
     const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
     const s = String(total % 60).padStart(2, "0");
-    el.textContent = `${h}:${m}:${s}`;
+    elements.forEach((el) => (el.textContent = `${h}:${m}:${s}`));
   };
   tick();
   setInterval(tick, 1000);
 }
 
-// ---------- Start ----------
+// start
 
 async function init() {
   buildBoard();
@@ -354,6 +389,9 @@ async function init() {
     paintRow(rowIndex, guess, evaluate(guess, state.answer.word), false);
   }
   if (saved.length) checkFinished(false);
+
+  // todays game already played, show the result, otherwise explain how to play
+  openModal(state.finished ? resultModal : helpModal);
 }
 
 init();

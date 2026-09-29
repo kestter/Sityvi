@@ -4,30 +4,82 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>სიტყვი</title>
+  <link rel="icon" type="" href="img.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header>
-    <h1>სიტყვი</h1>
-    <div class="puzzle-info">
-      <span id="puzzle-number">#1</span> · <span>ყოველდღიური თავსატეხი</span>
+    <button id="help-button" class="icon-button" aria-label="როგორ ვითამაშოთ">?</button>
+    <div class="title-box">
+      <h1>სიტყვი</h1>
+      <div class="puzzle-info">
+        <span id="puzzle-number">#1</span> · <span>მიდი აბა!</span>
+      </div>
     </div>
+    <button id="timer-button" class="icon-button" aria-label="შემდეგი სიტყვა">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="13" r="8"></circle>
+        <path d="M12 9v4l2.5 2.5"></path>
+        <path d="M9 2h6"></path>
+      </svg>
+    </button>
   </header>
 
   <main>
     <div id="message" class="message" aria-live="polite"></div>
     <div id="board" class="board"></div>
-    <div id="result" class="result hidden">
-      <p id="result-title" class="result-title"></p>
-      <p class="result-word"><span id="result-word"></span></p>
-      <p id="result-meaning" class="result-meaning"></p>
-    </div>
-    <div class="countdown-box">
-      <span>შემდეგი სიტყვა:</span>
-      <span id="countdown" class="countdown">--:--:--</span>
-    </div>
     <div id="keyboard" class="keyboard"></div>
   </main>
+
+  <!-- How to play -->
+  <div id="help-modal" class="modal-backdrop hidden">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <button class="modal-close" aria-label="დახურვა">&times;</button>
+      <h2 id="help-title">როგორ ვითამაშოთ</h2>
+      <p>გამოიცანით დღის სიტყვა <strong>6</strong> ცდაში.</p>
+      <ul>
+        <li>ყოველი ცდა უნდა იყოს <strong>5-ასოიანი</strong> ქართული სიტყვა. (გაითვალისწინეთ ზოგი სიტყვა შეიძლება არ იყოს ჩემს ლექსიკონში)</li>
+        <li>სიტყვის შესაყვანად დააჭირეთ ღილაკს „შეყვანა“.</li>
+        <li>ყოველი ცდის შემდეგ უჯრების ფერი გიჩვენებთ, რამდენად ახლოს ხართ პასუხთან.</li>
+      </ul>
+      <h3>მაგალითად:</h3>
+      <div class="example">
+        <div class="example-row">
+          <div class="tile correct">წ</div><div class="tile">ი</div><div class="tile">გ</div><div class="tile">ნ</div><div class="tile">ი</div>
+        </div>
+        <p>ასო <strong>წ</strong> სიტყვაშია და სწორ ადგილზე დგას.</p>
+      </div>
+      <div class="example">
+        <div class="example-row">
+          <div class="tile">ლ</div><div class="tile">ე</div><div class="tile present">ღ</div><div class="tile">ვ</div><div class="tile">ი</div>
+        </div>
+        <p>ასო <strong>ღ</strong> სიტყვაშია, მაგრამ სხვა ადგილზე.</p>
+      </div>
+      <div class="example">
+        <div class="example-row">
+          <div class="tile">დ</div><div class="tile">რ</div><div class="tile">ა</div><div class="tile absent">მ</div><div class="tile">ა</div>
+        </div>
+        <p>ასო <strong>მ</strong> სიტყვაში საერთოდ არ არის.</p>
+      </div>
+      <p class="modal-note">Have Fun, <br>With Love Kester!</p>
+    </div>
+  </div>
+
+  <!-- Next word countdown / result -->
+  <div id="result-modal" class="modal-backdrop hidden">
+    <div class="modal centered" role="dialog" aria-modal="true" aria-labelledby="result-title">
+      <button class="modal-close" aria-label="დახურვა">&times;</button>
+      <div id="result-box" class="hidden">
+        <h2 id="result-title"></h2>
+        <p id="result-word" class="result-word"></p>
+        <p id="result-meaning" class="result-meaning"></p>
+        <hr>
+      </div>
+      <h2 id="countdown-title">შემდეგი სიტყვა</h2>
+      <span class="countdown">--:--:--</span>
+    </div>
+  </div>
 
   <script src="main.js"></script>
 </body>
