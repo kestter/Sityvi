@@ -306,7 +306,7 @@ function checkFinished(announce) {
   state.finished = true;
   showResult(won);
   if (announce) {
-    if (won) showMessage("ბრწყინვალეა!");
+    if (won) showMessage("ბრავო!");
     setTimeout(() => openModal(resultModal), 1200);
   }
 }
